@@ -1,26 +1,40 @@
 'use strict';
 
-const { solvePuzzle, validate, checkPlacement } = require('../controllers/sudoku-solver.js');
+const solver = require('../controllers/sudoku-solver.js');
 
 module.exports = function (app) {
   app.route('/api/solve').post((req, res) => {
     const puzzle = req.body.puzzle;
 
-    const validation = validate(puzzle);
-    if (validation !== true) return res.json(validation);
+    if (!puzzle) {
+      return res.json({ error: 'Required field missing' });
+    }
 
-    const result = solvePuzzle(puzzle);
+    if (/[^1-9.]/.test(puzzle)) {
+      return res.json({ error: 'Invalid characters in puzzle' });
+    }
+
+    if (puzzle.length !== 81) {
+      return res.json({ error: 'Expected puzzle to be 81 characters long' });
+    }
+
+    const result = solver.solvePuzzle(puzzle);
     return res.json(result);
   });
 
   app.route('/api/check').post((req, res) => {
     const { puzzle, coordinate, value } = req.body;
 
-    const validation = validate(puzzle);
-    if (validation !== true) return res.json(validation);
-
     if (!puzzle || !coordinate || !value) {
       return res.json({ error: 'Required field(s) missing' });
+    }
+
+    if (/[^1-9.]/.test(puzzle)) {
+      return res.json({ error: 'Invalid characters in puzzle' });
+    }
+
+    if (puzzle.length !== 81) {
+      return res.json({ error: 'Expected puzzle to be 81 characters long' });
     }
 
     if (!/^[A-I][1-9]$/.test(coordinate)) {
@@ -32,15 +46,13 @@ module.exports = function (app) {
     }
 
     const row = coordinate.charCodeAt(0) - 65;
-    const col = parseInt(coordinate[1]) - 1;
+    const col = +coordinate[1] - 1;
 
-    const index = row * 9 + col;
-
-    if (puzzle[index] === value) {
+    if (puzzle[row * 9 + col] === value) {
       return res.json({ valid: true });
     }
 
-    const conflicts = checkPlacement(puzzle, row, col, value);
+    const conflicts = solver.checkPlacement(puzzle, row, col, value);
 
     if (conflicts.length === 0) {
       return res.json({ valid: true });
