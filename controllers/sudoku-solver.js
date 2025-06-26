@@ -20,24 +20,40 @@ function validate(puzzle) {
 }
 
 function checkPlacement(puzzle, row, col, value) {
-  const grid = puzzleToGrid(puzzle);
   const conflicts = [];
 
-  // fila
-  for (let c = 0; c < 9; c++)
-    if (grid[row][c] === value && c !== col) conflicts.push('row');
-  // columna
-  for (let r = 0; r < 9; r++)
-    if (grid[r][col] === value && r !== row) conflicts.push('column');
-  // región
-  const sr = Math.floor(row / 3) * 3;
-  const sc = Math.floor(col / 3) * 3;
-  for (let r = sr; r < sr + 3; r++)
-    for (let c = sc; c < sc + 3; c++)
-      if (grid[r][c] === value && (r !== row || c !== col)) conflicts.push('region');
+  // Revisar fila
+  for (let c = 0; c < 9; c++) {
+    if (c !== col && puzzle[row * 9 + c] === value) {
+      conflicts.push('row');
+      break;
+    }
+  }
 
-  return [...new Set(conflicts)];
+  // Revisar columna
+  for (let r = 0; r < 9; r++) {
+    if (r !== row && puzzle[r * 9 + col] === value) {
+      conflicts.push('column');
+      break;
+    }
+  }
+
+  // Revisar región
+  const startRow = Math.floor(row / 3) * 3;
+  const startCol = Math.floor(col / 3) * 3;
+  for (let r = startRow; r < startRow + 3; r++) {
+    for (let c = startCol; c < startCol + 3; c++) {
+      if ((r !== row || c !== col) && puzzle[r * 9 + c] === value) {
+        conflicts.push('region');
+        r = 10; // break doble for
+        break;
+      }
+    }
+  }
+
+  return conflicts;
 }
+
 function checkRowPlacement(puzzle, row, col, value) {
   for (let c = 0; c < 9; c++) {
     if (c !== col && puzzle[row * 9 + c] === value) {
