@@ -5,11 +5,15 @@ const solver = require('../controllers/sudoku-solver.js');
 module.exports = function (app) {
   app.route('/api/solve').post((req, res) => {
     const { puzzle } = req.body;
+    
+if (!puzzle) {
+  return res.json({ error: 'Required field missing' });
+}
 
-    const validation = solver.validate(puzzle);
-    if (validation !== true) {
-      return res.json(validation);
-    }
+const validation = solver.validate(puzzle);
+if (validation !== true) {
+  return res.json(validation);
+}
 
     const result = solver.solvePuzzle(puzzle);
     return res.json(result);
