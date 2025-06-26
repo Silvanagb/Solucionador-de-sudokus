@@ -38,15 +38,35 @@ function checkPlacement(puzzle, row, col, value) {
 
   return [...new Set(conflicts)];
 }
-
 function checkRowPlacement(puzzle, row, col, value) {
-  return checkPlacement(puzzle, row, col, value).filter(x => x === 'row').length === 0;
+  for (let c = 0; c < 9; c++) {
+    if (c !== col && puzzle[row * 9 + c] === value) {
+      return false;
+    }
+  }
+  return true;
 }
+
 function checkColPlacement(puzzle, row, col, value) {
-  return checkPlacement(puzzle, row, col, value).filter(x => x === 'column').length === 0;
+  for (let r = 0; r < 9; r++) {
+    if (r !== row && puzzle[r * 9 + col] === value) {
+      return false;
+    }
+  }
+  return true;
 }
+
 function checkRegionPlacement(puzzle, row, col, value) {
-  return checkPlacement(puzzle, row, col, value).filter(x => x === 'region').length === 0;
+  const startRow = Math.floor(row / 3) * 3;
+  const startCol = Math.floor(col / 3) * 3;
+  for (let r = startRow; r < startRow + 3; r++) {
+    for (let c = startCol; c < startCol + 3; c++) {
+      if ((r !== row || c !== col) && puzzle[r * 9 + c] === value) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 function solve(grid) {
