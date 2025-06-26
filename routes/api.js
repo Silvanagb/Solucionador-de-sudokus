@@ -51,6 +51,7 @@ if (validation !== true) {
     return res.json({ valid: true });
   }
 
-  return res.json({ valid: false, conflict: conflicts });
-});
+   return res.json({ valid: false, conflict: conflicts });
+  });
 };
+
